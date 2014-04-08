@@ -179,7 +179,7 @@ void exceptionHandler(NSException *exception) {
 }
 
 - (void)captureException:(NSException *)exception sendNow:(BOOL)sendNow {
-   [self captureException:exception additionalExtra:nil additionalTags:nil sendNow:sendNow];
+    [self captureException:exception additionalExtra:nil additionalTags:nil sendNow:sendNow];
 }
 
 - (void)captureException:(NSException *)exception additionalExtra:(NSDictionary *)additionalExtra additionalTags:(NSDictionary *)additionalTags sendNow:(BOOL)sendNow {
@@ -304,7 +304,22 @@ void exceptionHandler(NSException *exception) {
     [request setHTTPBody:JSON];
     [request setValue:header forHTTPHeaderField:@"X-Sentry-Auth"];
 
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:nil];
+    [NSURLConnection sendAsynchronousRequest:request
+                                       queue:[NSOperationQueue currentQueue]
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+                               NSHTTPURLResponse* urlResponse = (NSHTTPURLResponse*)response;
+
+                               if (urlResponse.statusCode != 200) {
+                                   switch (urlResponse.statusCode) {
+                                       case 400:
+                                           NSLog(@"Error when sent error report. Error: %@", [urlResponse.allHeaderFields objectForKey:@"X-Sentry-Error"]);
+                                           break;
+
+                                       default:
+                                           break;
+                                   }
+                               }
+                           }];
 }
 
 #pragma mark - JSON helpers
