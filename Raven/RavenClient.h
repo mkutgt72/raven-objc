@@ -23,6 +23,7 @@ typedef enum {
 
 @property (strong, nonatomic) NSDictionary *extra;
 @property (strong, nonatomic) NSDictionary *tags;
+@property (strong, nonatomic) NSString* protocolVersion;
 
 /**
  * By setting tags with setTags: selector it will also set default settings:
