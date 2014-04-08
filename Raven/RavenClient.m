@@ -20,12 +20,13 @@ NSString *const kRavenLogLevelArray[] = {
 };
 
 NSString *const userDefaultsKey = @"nl.mixedCase.RavenClient.Exceptions";
-NSString *const sentryProtocol = @"4";
 NSString *const sentryClient = @"raven-objc/0.1.0";
 
 static RavenClient *sharedClient = nil;
 
 @implementation RavenClient
+
+@synthesize protocolVersion;
 
 void exceptionHandler(NSException *exception) {
 	[[RavenClient sharedClient] captureException:exception sendNow:NO];
@@ -108,6 +109,7 @@ void exceptionHandler(NSException *exception) {
         self.config = [[RavenConfig alloc] init];
         self.extra = extra;
         self.tags = tags;
+        self.protocolVersion = @"4";
 
         // Parse DSN
         if (![self.config setDSN:DSN]) {
@@ -290,7 +292,7 @@ void exceptionHandler(NSException *exception) {
 
 - (void)sendJSON:(NSData *)JSON {
     NSString *header = [NSString stringWithFormat:@"Sentry sentry_version=%@, sentry_client=%@, sentry_timestamp=%d, sentry_key=%@, sentry_secret=%@",
-                        sentryProtocol,
+                        self.protocolVersion,
                         sentryClient,
                         (NSInteger)[NSDate timeIntervalSinceReferenceDate],
                         self.config.publicKey,
